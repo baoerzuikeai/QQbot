@@ -1,7 +1,6 @@
 package config
 
 import (
-	"fmt"
 	"log"
 	"os"
 
@@ -14,7 +13,7 @@ type BotInfo struct {
 }
 
 func Load() BotInfo {
-	data, err := os.ReadFile("/home/baoer/go/src/QQbot/config/config.yml")
+	data, err := os.ReadFile("../../config/config.yml")
 	if err != nil {
 		log.Fatalf("无法读取配置文件，%v", err)
 	}
@@ -24,6 +23,5 @@ func Load() BotInfo {
 	if err != nil {
 		log.Fatalf("解析配置文件出错，%v", err)
 	}
-	fmt.Println(botinfo)
 	return botinfo
 }
