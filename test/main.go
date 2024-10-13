@@ -77,6 +77,6 @@ func main() {
 		gm.MsgID = id
 		gm.GroupOpenid = group_openid
 		gm.Content = content
-		bot.SendGroupAtMessage(gm)
+		go bot.SendGroupAtMessage(gm)
 	}
 }

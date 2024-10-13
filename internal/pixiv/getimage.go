@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/base64"
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -31,6 +32,17 @@ func Getimage(c *client.Client) string {
 	return imagebase64
 }
 
+func GetSerchimage(c *client.Client, name string) string {
+	// 所有查询从 context 获取客户端设置, 如未设置将使用默认客户端。
+	var ctx = context.Background()
+	ctx = client.With(ctx, c)
+	imagebase64, err := Searchimage(ctx, name)
+	if err != nil {
+		log.Println("请求出错")
+	}
+	return imagebase64
+}
+
 func Searchimage(ctx context.Context, name string) (string, error) {
 	// 搜索画作
 	result, err := artwork.Search(ctx, name)
@@ -41,10 +53,16 @@ func Searchimage(ctx context.Context, name string) (string, error) {
 	//fmt.Println(result.JSON)                                        // json return data.
 	artwork := result.Artworks() // []artwork.Artwork，只有部分数据，通过 `Fetch` `FetchPages` 方法获取完整数据。\
 	//
-	randomNumber := rand.Intn(len(artwork))
-	fmt.Println(artwork[randomNumber])
+
+	if len(artwork)-1 <= 0 {
+		return "", errors.New("请求参数为0")
+	}
+	randomNumber := rand.Intn(len(artwork) - 1)
 	urls := artwork[randomNumber].Image
 	original_url := match(urls.Thumb)
+	if original_url == "" {
+		return "", errors.New("匹配出错")
+	}
 	// 生成0到n-1之间的随机整数
 	imagebase64 := RequestImage(original_url, artwork[randomNumber].Title)
 	//artwork.Search(ctx, "パチュリー・ノーレッジ", artwork.SearchOptionPage(2)) // 获取第二页
@@ -53,15 +71,19 @@ func Searchimage(ctx context.Context, name string) (string, error) {
 }
 
 func GetRankimage(ctx context.Context) (string, error) {
-	rank := &artwork.Rank{Mode: "monthly"}
+	rank := &artwork.Rank{Mode: "daily"}
 	err := rank.Fetch(ctx)
 	if err != nil {
 		log.Println(err)
 		return "", err
 	}
+
 	randomNumber := rand.Intn(len(rank.Items) - 1)
 	urls := rank.Items[randomNumber].Image
 	original_url := match(urls.Regular)
+	if original_url == "" {
+		return "", errors.New("匹配出错")
+	}
 	imagebase64 := RequestImage(original_url, rank.Items[randomNumber].ID)
 	return imagebase64, nil
 }
@@ -104,8 +126,9 @@ func match(url string) string {
 	if match != nil {
 		// 输出匹配的结果
 		fmt.Println(match) // 输出: 2024/08/14/03/06/07/121468483
+		return "https://i.pximg.net/img-original/" + match[0] + ".jpg"
 	} else {
 		fmt.Println("No match found")
+		return ""
 	}
-	return "https://i.pximg.net/img-original/" + match[0] + ".jpg"
 }

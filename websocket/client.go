@@ -65,14 +65,16 @@ func SendReLogin(s uint32, session_id string, c *websocket.Conn) {
 }
 
 func SendHeartBeat(c *websocket.Conn, ctx context.Context) {
-	ticker := time.NewTicker(30 * time.Second)
+	ticker := time.NewTicker(38 * time.Second)
 	defer ticker.Stop()
-
+	heartData := dto.WSPayloadBase{
+		OPCode: 1,
+	}
 	for {
 		select {
 		case <-ticker.C:
 			// 发送心跳消息
-			err := c.WriteMessage(websocket.TextMessage, []byte("heartbeat"))
+			err := c.WriteJSON(heartData)
 			if err != nil {
 				log.Println("error sending heartbeat:", err)
 				return

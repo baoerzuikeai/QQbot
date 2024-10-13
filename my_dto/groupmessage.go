@@ -1,9 +1,10 @@
 package my_dto
 
 type GroupMessage struct {
-	GroupOpenid string      `json:"group_openid"`       // 机器人访问群的openid
-	Content     string      `json:"content"`            // 文本内容
-	MsgType     int         `json:"msg_type"`           // 消息类型：0 文本，2 markdown，3 ark 消息，4 embed，7 media 富媒体
+	GroupOpenid string      `json:"group_openid"`      // 机器人访问群的openid
+	Content     string      `json:"content,omitempty"` // 文本内容
+	MsgType     int         `json:"msg_type"`          // 消息类型：0 文本，2 markdown，3 ark 消息，4 embed，7 media 富媒体
+	MarkDown    interface{} `json:"markdown"`
 	EventID     string      `json:"event_id,omitempty"` // 前置收到的事件ID，用于发送被动消息，支持的事件："INTERACTION_CREATE"、"GROUP_ADD_ROBOT"、"GROUP_MSG_RECEIVE"
 	MsgID       string      `json:"msg_id,omitempty"`   // 前置收到的用户发送过来的消息ID，用于发送被动消息（回复）
 	MsgSeq      int         `json:"msg_seq,omitempty"`  // 回复消息的序号，与msg_id联合使用，默认1
