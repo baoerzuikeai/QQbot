@@ -13,7 +13,7 @@ import (
 	"github.com/baoer/QQbot/my_dto"
 )
 
-func SendGroupAtMessage(gm my_dto.GroupMessage) error {
+func SendGroupAtMessage(gm my_dto.GroupMessage, send_msg_chan, recive_msg_chan chan string) error {
 	switch {
 	case strings.HasPrefix(gm.Content, " /帮助 "):
 	case strings.HasPrefix(gm.Content, " /随机图片 "):
@@ -47,19 +47,7 @@ func SendGroupAtMessage(gm my_dto.GroupMessage) error {
 			return err
 		}
 	case strings.HasPrefix(gm.Content, " /聊天 "):
-		if err := func() error {
-			gm.Content = "你好"
-			gm.MsgType = 0
-			err := PostGroupMessage(gm)
-			if err != nil {
-				log.Println(err)
-				return err
-			}
-			return nil
-		}(); err != nil {
-			log.Println(err)
-			return err
-		}
+
 	case strings.HasPrefix(gm.Content, " /搜索图片 "):
 		if err := func() error {
 			sep := strings.Split(gm.Content, " ")
@@ -73,15 +61,12 @@ func SendGroupAtMessage(gm my_dto.GroupMessage) error {
 				}
 				return nil
 			}
-			gm.Media = PostSerchFile(gm, sep[2]+" 10000users入り")
+			gm.Media = PostSerchFile(gm, sep[2]+" 000")
 			gm.Content = "\n✌️🥵✌️"
 			gm.MsgType = 7
 			PostGroupMessage(gm)
 			media := gm.Media.(my_dto.Media)
 			if media.FileUuid == "" {
-				// gm.Media = PostSerchFile(gm, sep[1])
-				// media = gm.Media.(*my_dto.Media)
-				// PostGroupMessage(gm)
 				gm.Content = "\n未找到匹配图片，请更换关键词🤡👉🏻🤡"
 				gm.MsgType = 0
 				gm.Media = nil
@@ -108,6 +93,20 @@ func SendGroupAtMessage(gm my_dto.GroupMessage) error {
 			return err
 		}
 	default:
+		if err := func() error {
+			send_msg_chan <- gm.Content
+			gm.Content = "\n" + <-recive_msg_chan
+			gm.MsgType = 0
+			err := PostGroupMessage(gm)
+			if err != nil {
+				log.Println(err)
+				return err
+			}
+			return nil
+		}(); err != nil {
+			log.Println(err)
+			return err
+		}
 	}
 
 	return nil

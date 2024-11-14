@@ -20,7 +20,7 @@ func InitClient() *client.Client {
 	// 使用 PHPSESSID Cookie 登录 (推荐)。
 	c := &client.Client{}
 	c.SetDefaultHeader("User-Agent", client.DefaultUserAgent)
-	c.SetPHPSESSID("PHPSESSID")
+	c.SetPHPSESSID("110414188_lYQ1F3cdqrydiSeZ031mi2TeDQznoJM3")
 	return c
 }
 
@@ -71,7 +71,7 @@ func Searchimage(ctx context.Context, name string) (string, error) {
 }
 
 func GetRankimage(ctx context.Context) (string, error) {
-	rank := &artwork.Rank{Mode: "daily"}
+	rank := &artwork.Rank{Mode: "weekly"}
 	err := rank.Fetch(ctx)
 	if err != nil {
 		log.Println(err)
